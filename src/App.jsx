@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 
 import Main from './layout/Main';
 import Loader from './components/Loader';
@@ -22,6 +22,8 @@ const initialState = {
 	difficulty: 'easy',
 	category: '9',
 	secondsRemaining: null,
+	finishedQuiz: {},
+	allFinishedQuizzes: [],
 };
 
 function reducer(state, action) {
@@ -77,6 +79,19 @@ function reducer(state, action) {
 			return {
 				...state,
 				status: 'finished',
+				finishedQuiz: {
+					title: state.questions[0].category,
+					score: state.score,
+					difficulty: state.difficulty,
+					numberOfQuestions: state.questionsLength,
+				},
+			};
+		case 'restartQuiz':
+			return {
+				...initialState,
+				questions: state.questions,
+				secondsRemaining: state.questions.length * SECS_PER_QUESTION,
+				status: 'active',
 			};
 		case 'goToSettings':
 			return {
@@ -84,6 +99,7 @@ function reducer(state, action) {
 				questions: state.questions,
 				status: 'ready',
 			};
+
 		default:
 			throw new Error('Action unknown');
 	}
@@ -102,10 +118,24 @@ function App() {
 			difficulty,
 			category,
 			secondsRemaining,
+			finishedQuiz,
 		},
 		dispatch,
 	] = useReducer(reducer, initialState);
 	const numberOfQuestions = questions.length;
+
+	const [allFinishedQuizzes, setAllFinishedQuizzes] = useState([]);
+
+	useEffect(() => {
+		const isObjectEmpty = (objectName) => {
+			return Object.keys(objectName).length === 0;
+		};
+		if (isObjectEmpty(finishedQuiz) === false) {
+			setAllFinishedQuizzes((current) => [...current, finishedQuiz]);
+		}
+	}, [finishedQuiz]);
+
+	localStorage.setItem('quizzes', JSON.stringify(allFinishedQuizzes));
 
 	useEffect(
 		function () {
