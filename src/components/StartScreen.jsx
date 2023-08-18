@@ -31,7 +31,6 @@ export default function StartScreen({
 	);
 }
 
-// 👇️ define prop types for the component
 StartScreen.propTypes = {
 	numberOfQuestions: PropTypes.number,
 	dispatch: PropTypes.func,
